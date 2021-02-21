@@ -6,6 +6,7 @@
 RF24 radio(7, 8); // CE, CSN
 const byte address[6] = "00555";
 
+
 struct DataPkg {
   //left joystick
   byte throttle;
@@ -54,8 +55,8 @@ void readJoySticks() {
     pkg.throttle   = mapCarThrottle(analogRead(A0), 512, true);
     pkg.push1      = 1 - digitalRead(2);
     
-    pkg.xAxis      = mapCarDirection(analogRead(A3),  4, 4, 1023, true);
-    pkg.yAxis      = mapCarDirection(analogRead(A2),  3, 4, 1023, true);
+    pkg.xAxis      = mapAxis(analogRead(A3),  4, 4, 1023, true);
+    pkg.yAxis      = mapAxis(analogRead(A2),  3, 4, 1023, true);
     pkg.push2      = 1 - digitalRead(3);
 }
 
@@ -71,7 +72,7 @@ void resetData() {
   pkg.push2 = 0;
 }
 
-int mapCarDirection(int val, int lower, int middle, int upper, bool reverse) {
+int mapAxis(int val, int lower, int middle, int upper, bool reverse) {
   val = constrain(val, lower, upper);
   if (val < middle)
     val = map(val, lower, middle, 1, 255);
@@ -95,7 +96,7 @@ int mapCarThrottle(int val, int middle, bool reverse) {
 }
 
 unsigned long lastDebugTime = 0;
-int debugDelay = 100;
+int debugDelay = 120;
 void debug() {
   if (millis() - lastDebugTime > debugDelay) {
     //printJoystickValues();
