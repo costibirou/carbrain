@@ -19,8 +19,6 @@ struct DataPkg {
 DataPkg pkg;
 
 void setup() {
-  //pinMode(A3, OUTPUT);
-
   Serial.begin(9600);
   radio.begin();
 

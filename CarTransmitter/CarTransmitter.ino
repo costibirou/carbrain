@@ -7,6 +7,41 @@ RF24 radio(7, 8); // CE, CSN
 const byte address[6] = "00555";
 
 
+class JoyStick {
+  private:
+    int xAxis, yAxis, pushed;
+    int xPin, yPin, swPin;
+  public:
+    JoyStick(int xPin, int yPin, int swPin) {
+      this -> xAxis = 0;
+      this -> yAxis = 0;
+      this -> pushed = 0;
+      
+      this -> xPin = xPin;
+      this -> yPin = yPin;
+      this -> swPin = swPin;
+    }
+    int getXAxis() {
+      return xAxis;
+    }
+    int getYAxis() {
+      return yAxis;
+    }
+    int getPushed() {
+      return pushed;
+    }
+    void setup() {
+      //Joystick pushed pin setup
+      pinMode(swPin, INPUT);
+      digitalWrite(swPin, HIGH);
+    }
+    void sample() {
+      this -> xAxis = analogRead(xPin);
+      this -> yAxis = analogRead(yPin);
+      this -> pushed = 1 - digitalRead(swPin);
+    }
+};
+
 struct DataPkg {
   //left joystick
   byte throttle;
@@ -18,15 +53,17 @@ struct DataPkg {
   byte push2;
 };
 
+JoyStick leftJoyStick(A1, A0, 2);
+//JoyStick rightJoyStick(A3, A2, 3);
+
+DataPkg pkg;
+
+
 void setup() {
   // Open serial
   Serial.begin(9600);
-
-  //Joystick setup
-  pinMode(2, INPUT);
-  digitalWrite(2, HIGH);
-  pinMode(3, INPUT);
-  digitalWrite(3, HIGH);
+  
+  leftJoyStick.setup();
 
   //Radio setup
   pinMode(7, OUTPUT);
@@ -41,23 +78,21 @@ void setup() {
 }
 
 void loop() {
-  readJoySticks();
+  leftJoyStick.sample();
+  calculatePackage();
   transmit();
   debug();
 }
 
-
-DataPkg pkg;
-
-void readJoySticks() {
-  //The calibration numbers used here should be measured for
+void calculatePackage() {
+    //The calibration numbers used here should be measured for
     //your joysticks until they send the correct value
-    pkg.throttle   = mapCarThrottle(analogRead(A0), 512, true);
-    pkg.push1      = 1 - digitalRead(2);
+    pkg.throttle   = mapCarThrottle(leftJoyStick.getYAxis(), 512, true);
+    pkg.push1      = leftJoyStick.getPushed();
     
-    pkg.xAxis      = mapAxis(analogRead(A3),  4, 4, 1023, true);
-    pkg.yAxis      = mapAxis(analogRead(A2),  3, 4, 1023, true);
-    pkg.push2      = 1 - digitalRead(3);
+    pkg.xAxis      = mapAxis(leftJoyStick.getXAxis(),  4, 4, 1023, true);
+    //pkg.yAxis      = mapAxis(rightJoyStick.getYAxis(),  3, 4, 1023, true);
+    //pkg.push2      = rightJoyStick.getSwPin();
 }
 
 void transmit() {
@@ -106,20 +141,21 @@ void debug() {
 }
 
 void printJoystickValues() {
-  Serial.print("A0        "); Serial.print(analogRead(A0));
-  Serial.print(" A1       "); Serial.print(analogRead(A1));
-  Serial.print(" D2       "); Serial.print(digitalRead(2));
+  Serial.print("xAxis        "); Serial.print(leftJoyStick.getXAxis());
+  Serial.print(" yAxis       "); Serial.print(leftJoyStick.getYAxis());
+  Serial.print(" pushed      "); Serial.print(leftJoyStick.getPushed());
 
-  Serial.print(" A2       "); Serial.print(analogRead(A2));
-  Serial.print(" A3       "); Serial.print(analogRead(A3));
-  Serial.print(" D3       "); Serial.println(digitalRead(3));
+  //Serial.print(" A2       "); Serial.print(analogRead(A2));
+  //Serial.print(" A3       "); Serial.print(analogRead(A3));
+  //Serial.print(" D3       "); Serial.println(digitalRead(3));
+  Serial.println();
 }
 
 void printPkgValues() {
   Serial.print("throttle  "); Serial.print(pkg.throttle);
   Serial.print(" push1    "); Serial.print(pkg.push1);
-  Serial.print(" xAxis    "); Serial.print(pkg.xAxis);
-  Serial.print(" yAxis    "); Serial.print(pkg.yAxis);
-  Serial.print(" push2    "); Serial.print(pkg.push2);
+//  Serial.print(" xAxis    "); Serial.print(pkg.xAxis);
+//  Serial.print(" yAxis    "); Serial.print(pkg.yAxis);
+//  Serial.print(" push2    "); Serial.print(pkg.push2);
   Serial.println();
 }
