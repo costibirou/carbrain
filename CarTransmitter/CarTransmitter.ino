@@ -49,14 +49,14 @@ void loop() {
 DataPkg pkg;
 
 void readJoySticks() {
-    //The calibration numbers used here should be measured for
+  //The calibration numbers used here should be measured for
     //your joysticks until they send the correct value
     pkg.throttle   = mapCarThrottle(analogRead(A0), 512, true);
     pkg.push1      = 1 - digitalRead(2);
     
-//    pkg.xAxis      = mapCarDirection(analogRead(A3),  4, 4, 1023, true);
-//    pkg.yAxis      = mapCarDirection(analogRead(A2),  3, 4, 1023, true);
-//    pkg.push2      = 1 - digitalRead(3);
+    pkg.xAxis      = mapCarDirection(analogRead(A3),  4, 4, 1023, true);
+    pkg.yAxis      = mapCarDirection(analogRead(A2),  3, 4, 1023, true);
+    pkg.push2      = 1 - digitalRead(3);
 }
 
 void transmit() {
@@ -115,7 +115,7 @@ void printJoystickValues() {
 }
 
 void printPkgValues() {
-  Serial.print(" Sender throttle  "); Serial.print(pkg.throttle);
+  Serial.print("throttle  "); Serial.print(pkg.throttle);
   Serial.print(" push1    "); Serial.print(pkg.push1);
   Serial.print(" xAxis    "); Serial.print(pkg.xAxis);
   Serial.print(" yAxis    "); Serial.print(pkg.yAxis);

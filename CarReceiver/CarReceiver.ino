@@ -84,7 +84,7 @@ void debug() {
 }
 
 void printPkgValues() {
-  Serial.print("Receiver throttle   "); Serial.print(pkg.throttle);
+  Serial.print("trottle   "); Serial.print(pkg.throttle);
   Serial.print(" push1     "); Serial.print(pkg.push1);      
   Serial.print(" xAxis     "); Serial.print(pkg.xAxis);
   Serial.print(" yAxis     "); Serial.print(pkg.yAxis);
