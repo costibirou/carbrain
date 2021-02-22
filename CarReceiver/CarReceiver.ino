@@ -29,18 +29,17 @@ void setup() {
 
   radio.openReadingPipe(0, address);
 }
+unsigned long lastRecvTime = 0;
 
 void loop() {
   recvData();
-  setPPMValuesFromData();
-  stopOnLostSignal();
+  //setPPMValuesFromData();
+  //stopOnLostSignal();
   debug();
   //delay(50);
 }
 
 
-
-unsigned long lastRecvTime = 0;
 void recvData(){
   if (radio.available()){
     radio.read(&pkg, sizeof(DataPkg));
@@ -53,7 +52,8 @@ void setPPMValuesFromData() {
   analogWrite(3, pkg.throttle);
 }
 
-int lostSignalTimeout = 1000;
+// no reception stop
+int lostSignalTimeout = 2000;
 void stopOnLostSignal() {
   if (millis() - lastRecvTime > lostSignalTimeout) {
     resetData();
@@ -85,7 +85,9 @@ void printPkgValues() {
   Serial.print("throttle   "); Serial.print(pkg.throttle);
   Serial.print(" push1     "); Serial.print(pkg.push1);      
   Serial.print(" xAxis     "); Serial.print(pkg.xAxis);
-  Serial.print(" yAxis     "); Serial.print(pkg.yAxis);
-  Serial.print(" push2     "); Serial.print(pkg.push2);
+  Serial.print(" gap       "); Serial.print(millis() - lastRecvTime);
+  //Serial.print(" lastRcvTime "); Serial.print(lastRecvTime);
+//  Serial.print(" yAxis     "); Serial.print(pkg.yAxis);
+//  Serial.print(" push2     "); Serial.print(pkg.push2);
   Serial.println();
 }

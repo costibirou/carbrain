@@ -80,7 +80,7 @@ void setup() {
 void loop() {
   leftJoyStick.sample();
   calculatePackage();
-  transmit();
+  transmitWithDelay();
   debug();
 }
 
@@ -95,10 +95,28 @@ void calculatePackage() {
     //pkg.push2      = rightJoyStick.getSwPin();
 }
 
-void transmit() {
-    radio.write(&pkg, sizeof(DataPkg));
+unsigned long lastTransmitTime = 0;
+int transmitDelay = 50;
+void transmitWithDelay() {
+  if (millis() - lastTransmitTime > transmitDelay) {
+    transmit();
+    lastTransmitTime = millis();
+  }
 }
-
+void transmit() {
+//  unsigned long start_timer = micros();                    // start the timer
+  bool report = radio.write(&pkg, sizeof(DataPkg));        // transmit & save the report
+//  unsigned long end_timer = micros();                      // end the timer
+//  if (report) {
+//     Serial.print(F("Transmission successful! "));          // payload was delivered
+//     Serial.print(F("Time to transmit = "));
+//     Serial.print(end_timer - start_timer);                 // print the timer result
+//     Serial.print(F(" us. Sent: "));
+//     //Serial.println(payload);                               // print payload sent
+//  } else {
+//     Serial.println(F("Transmission failed or timed out")); // payload was not delivered
+//  }
+}
 void resetData() {
   pkg.throttle = 0;
   pkg.push1 = 0;
@@ -154,7 +172,8 @@ void printJoystickValues() {
 void printPkgValues() {
   Serial.print("throttle  "); Serial.print(pkg.throttle);
   Serial.print(" push1    "); Serial.print(pkg.push1);
-//  Serial.print(" xAxis    "); Serial.print(pkg.xAxis);
+  Serial.print(" xAxis    "); Serial.print(pkg.xAxis);
+//  Serial.print("Transmitted "); Serial.print(lastTransmitTime);
 //  Serial.print(" yAxis    "); Serial.print(pkg.yAxis);
 //  Serial.print(" push2    "); Serial.print(pkg.push2);
   Serial.println();
