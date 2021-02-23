@@ -35,16 +35,20 @@ void loop() {
   recvData();
   //setPPMValuesFromData();
   //stopOnLostSignal();
-  debug();
+  //debug();
   //delay(50);
 }
 
-
+bool debugTransmissionGap = true;
 void recvData(){
   if (radio.available()){
     radio.read(&pkg, sizeof(DataPkg));
+    if (debugTransmissionGap) {
+      Serial.print(" gap       "); Serial.println(millis() - lastRecvTime);
+    }
     lastRecvTime = millis();
   }
+  
 }
 
 void setPPMValuesFromData() {
@@ -72,22 +76,23 @@ void resetData(){
   pkg.push2 = 0;
 }
 
+bool debug = false;
 unsigned long lastDebugTime = 0;
 int debugDelay = 100;
-void debug() {
-  if (millis() - lastDebugTime > debugDelay) {
+void timedDebug() {
+  if (debug && (millis() - lastDebugTime > debugDelay)) {
     printPkgValues();
     lastDebugTime = millis();
   }
+  Serial.println();
 }
 
 void printPkgValues() {
   Serial.print("throttle   "); Serial.print(pkg.throttle);
   Serial.print(" push1     "); Serial.print(pkg.push1);      
   Serial.print(" xAxis     "); Serial.print(pkg.xAxis);
-  Serial.print(" gap       "); Serial.print(millis() - lastRecvTime);
   //Serial.print(" lastRcvTime "); Serial.print(lastRecvTime);
 //  Serial.print(" yAxis     "); Serial.print(pkg.yAxis);
 //  Serial.print(" push2     "); Serial.print(pkg.push2);
-  Serial.println();
+  
 }
